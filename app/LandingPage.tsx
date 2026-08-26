@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { FormEvent, useRef, useState } from 'react';
 
 declare global {
@@ -30,6 +29,22 @@ function track(event: 'cta_click' | 'form_start' | 'lead_success') {
   window.dispatchEvent(new CustomEvent('lavital:analytics', { detail: payload }));
 }
 
+const githubPagesHost = 'alexleonoff2001-prog.github.io';
+const githubPagesBase = '/lavital-landing-v2';
+const hostedApiUrl = 'https://lavital-bienestar-colombia.alexleonoff2001.chatgpt.site/api/leads';
+
+function assetUrl(path: string) {
+  return typeof window !== 'undefined' && window.location.hostname === githubPagesHost
+    ? `${githubPagesBase}${path}`
+    : path;
+}
+
+function leadsApiUrl() {
+  return typeof window !== 'undefined' && window.location.hostname === githubPagesHost
+    ? hostedApiUrl
+    : '/api/leads';
+}
+
 function CtaLink({ children, className = 'button', location }: { children: React.ReactNode; className?: string; location: string }) {
   return <a className={className} href="#contacto" onClick={() => track('cta_click')} data-cta-location={location}>{children}</a>;
 }
@@ -38,7 +53,7 @@ export default function LandingPage() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const formStarted = useRef(false);
-  const startedAt = useRef(Date.now());
+  const startedAt = useRef(0);
 
   function beginForm() {
     if (!formStarted.current) {
@@ -56,7 +71,7 @@ export default function LandingPage() {
     setMessage('');
     const data = new FormData(form);
     try {
-      const response = await fetch('/api/leads', {
+      const response = await fetch(leadsApiUrl(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -108,7 +123,7 @@ export default function LandingPage() {
         </div>
         <div className="hero-visual">
           <div className="image-frame">
-            <Image src="/images/lavital-frascoycaja.jpg" alt="Frasco y caja de Lavital, presentación de 30 unidades" fill priority sizes="(max-width: 800px) 92vw, 46vw" />
+            <img src={assetUrl('/images/lavital-frascoycaja.jpg')} alt="Frasco y caja de Lavital, presentación de 30 unidades" fetchPriority="high" />
           </div>
           <div className="orbit orbit-one" aria-hidden="true" /><div className="orbit orbit-two" aria-hidden="true" />
           <span className="floating-note">Tu rutina.<br /><strong>Tu ritmo.</strong></span>
@@ -138,7 +153,7 @@ export default function LandingPage() {
 
       <section className="lifestyle section" aria-labelledby="lifestyle-title">
         <div className="lifestyle-photo">
-          <Image src="/images/lavital-en-rutina.jpg" alt="Persona sosteniendo Lavital en un entorno natural" fill sizes="(max-width: 900px) 100vw, 50vw" />
+          <img src={assetUrl('/images/lavital-en-rutina.jpg')} alt="Persona sosteniendo Lavital en un entorno natural" loading="lazy" />
           <span>CONSTANCIA<br /><strong>SE SIENTE.</strong></span>
         </div>
         <div className="lifestyle-copy">
